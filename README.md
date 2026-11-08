@@ -2,6 +2,8 @@
 
 A Java 17 Servlet/JSP application adapted from [lokeshmori/Hospital_Management-System-HSM](https://github.com/lokeshmori/Hospital_Management-System-HSM), with transactional scheduling, role-based access, automated database tests, and a deployable WAR.
 
+![Hospital Management System homepage showing appointment booking and care specialties](docs/images/hospital-homepage.png)
+
 ## Implemented behavior
 
 - Patients reserve **published 30-minute slots** and see status, notes, and activity history.
