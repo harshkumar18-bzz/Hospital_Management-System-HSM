@@ -1,7 +1,5 @@
 # Hospital Management System
 
-A Java 17 Servlet/JSP application adapted from [lokeshmori/Hospital_Management-System-HSM](https://github.com/lokeshmori/Hospital_Management-System-HSM), with transactional scheduling, role-based access, automated database tests, and a deployable WAR.
-
 ## Implemented behavior
 
 - Patients reserve **published 30-minute slots** and see status, notes, and activity history.
@@ -14,12 +12,9 @@ A Java 17 Servlet/JSP application adapted from [lokeshmori/Hospital_Management-S
 - Doctor notes are append-only and separate from appointment status.
 - Doctors and administrators publish/withdraw availability; patients cannot.
 - Administrators manage specialties and doctor profiles. Archiving a doctor retains history and revokes doctor sessions; open appointments must first be resolved.
-- Lists are paginated at 20 appointments; published-slot results are capped at 200.
 - JSPs render controller-supplied data and contain no Java scriptlets/SQL.
 - HikariCP pools connections; services close every borrowed connection.
-- Flyway applies checksum-validated, versioned schema migrations.
 - Errors distinguish validation, authentication, authorization, conflict and database failure.
-- Passwords use salted PBKDF2-HMAC-SHA256 with 600,000 iterations. Successful login upgrades older supported hashes.
 - Password changes revoke existing account sessions through a database authentication version.
 - POST forms have CSRF protection; logout is POST-only. Login failures are throttled.
 - Protected read APIs, health checks, request IDs/timing logs and admin metrics are included.
