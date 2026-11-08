@@ -1,0 +1,37 @@
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: hospital_1
+      MYSQL_USER: hospital
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+    volumes:
+      - hospital-db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=$$MYSQL_ROOT_PASSWORD mysql -h 127.0.0.1 -u root -e 'SELECT 1' >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:${APP_PORT:-8080}:8080"
+    environment:
+      DB_URL: jdbc:mysql://db:3306/hospital_1?allowPublicKeyRetrieval=true&useSSL=false
+      DB_USER: hospital
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      DB_POOL_SIZE: ${DB_POOL_SIZE:-10}
+      DB_MIGRATE: "true"
+      DEMO_MODE: ${DEMO_MODE:-false}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?Set ADMIN_EMAIL in .env}
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:?Set ADMIN_PASSWORD_HASH in .env}
+      HOSPITAL_ZONE: ${HOSPITAL_ZONE:-Asia/Kolkata}
+      SECURE_COOKIES: ${SECURE_COOKIES:-false}
+      TZ: UTC
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: on-failure:3
+volumes:
+  hospital-db:

@@ -1,0 +1,7 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core"%>
+<%@page isELIgnored="false"%>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Change password | HMS</title><%@include file="component/allcss.jsp"%></head>
+<body><%@include file="component/navbar.jsp"%><main id="main-content" class="auth-main"><section class="auth-panel mx-auto" style="max-width:440px"><h1 class="h3">Change your password</h1><p class="subtext">Choose a password you haven't used before.</p><%@include file="component/messages.jsp"%>
+<form action="userChangePassword" method="post">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}"><div class="mb-3"><label class="form-label" for="old">Current password</label><input class="form-control" id="old" name="oldPassword" type="password" autocomplete="current-password" required maxlength="128"></div><div class="mb-4"><label class="form-label" for="new">New password</label><input class="form-control" id="new" name="newPassword" type="password" autocomplete="new-password" required minlength="8" maxlength="128"><p class="form-note">Use at least 8 characters.</p></div><button class="btn btn-primary w-100">Update password</button></form></section></main><%@include file="component/footer.jsp"%></body></html>

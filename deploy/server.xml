@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Server port="-1">
+ <Service name="Catalina">
+  <Connector port="8080" protocol="HTTP/1.1" connectionTimeout="20000" maxPostSize="16384" maxParameterCount="50" server="Hospital"/>
+  <Engine name="Catalina" defaultHost="localhost">
+   <Host name="localhost" appBase="webapps" unpackWARs="true" autoDeploy="false">
+    <Valve className="org.apache.catalina.valves.ErrorReportValve" showReport="false" showServerInfo="false"/>
+   </Host>
+  </Engine>
+ </Service>
+</Server>

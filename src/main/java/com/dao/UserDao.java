@@ -1,128 +1,76 @@
 package com.dao;
 
-import java.sql.Connection ;
-
 import com.entity.User;
-import com.mysql.cj.protocol.Resultset;
+import com.security.Passwords;
+import java.sql.*;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+public final class UserDao {
+  private final Connection c;
 
-public class UserDao {
+  public UserDao(Connection c) {
+    this.c = c;
+  }
 
-	private Connection conn ;
+  public int register(User user) throws SQLException {
+    try (PreparedStatement ps =
+        c.prepareStatement(
+            "INSERT INTO user_dtls(full_name,email,password) VALUES(?,?,?)",
+            Statement.RETURN_GENERATED_KEYS)) {
+      ps.setString(1, user.getFullName());
+      ps.setString(2, user.getEmail());
+      ps.setString(3, Passwords.hash(user.getPassword()));
+      ps.executeUpdate();
+      try (ResultSet rs = ps.getGeneratedKeys()) {
+        rs.next();
+        return rs.getInt(1);
+      }
+    }
+  }
 
-	public UserDao(Connection conn) {
-		super();
-		this.conn = conn;
-	}
-	
-	public boolean register(User u) {
-		
-		boolean f =false ;
-		
-		try {
-			
-			String sql =" insert into user_dtls(full_name,email,password) values(?,?,?)";
-			
-			PreparedStatement ps = conn.prepareStatement(sql);
-			
-			ps.setString(1, u.getFullName());
-			ps.setString(2, u.getEmail());
-			ps.setString(3, u.getPassword());
-			
-			
-			  int i = ps.executeUpdate();
-			  
-			  if(i==1) {
-				  f=true ;
-			  }
-			
-			
-		} catch (Exception e) {
-			
-			e.printStackTrace();
-			
-		}
-		
-		
-		return f  ;
-	}
-	
-	public User login(String em , String psw) {
-		
-		User u = null ;
-		
-		try {
-			String sql ="select * from user_dtls where email=? and password=?";
-		
-		PreparedStatement ps = conn.prepareStatement(sql);
-		ps.setString(1, em);
-		ps.setString(2, psw);
-		
-		ResultSet rs = ps.executeQuery();
-		
-		while( rs.next()) {
-			
-			u = new User();
-			
-			u.setId( rs.getInt(1));
-			u.setFullName(rs.getString(2));
-			u.setEmail(rs.getString(3));
-			u.setPassword(rs.getString(4));
-			
-		}
-		
-		
-		} catch (Exception e) {
-			
-			e.printStackTrace();
-		}
-		
-		return u;
-	}
-	
-	public boolean checkOldPassword(int userid, String oldPassword) {
-		boolean f = false;
+  public User login(String email, String password) throws SQLException {
+    try (PreparedStatement ps =
+        c.prepareStatement(
+            "SELECT id,full_name,email,password,auth_version FROM user_dtls WHERE email=?")) {
+      ps.setString(1, email);
+      try (ResultSet rs = ps.executeQuery()) {
+        if (!rs.next() || !Passwords.verify(password, rs.getString("password"))) return null;
+        User user = new User();
+        user.setId(rs.getInt("id"));
+        user.setFullName(rs.getString("full_name"));
+        user.setEmail(rs.getString("email"));
+        user.setAuthVersion(rs.getInt("auth_version"));
+        String previous = rs.getString("password");
+        if (Passwords.needsRehash(previous))
+          try (PreparedStatement update =
+              c.prepareStatement("UPDATE user_dtls SET password=? WHERE id=? AND password=?")) {
+            update.setString(1, Passwords.hash(password));
+            update.setInt(2, user.getId());
+            update.setString(3, previous);
+            update.executeUpdate();
+          }
+        return user;
+      }
+    }
+  }
 
-		try {
-			String sql = "select * from user_dtls where id=? and password=?";
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setInt(1, userid);
-			ps.setString(2, oldPassword);
-
-			ResultSet rs = ps.executeQuery();
-			while (rs.next()) {
-				f = true;
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return f;
-	}
-
-	public boolean changePassword(int userid, String newPassword) {
-		boolean f = false;
-
-		try {
-			String sql = "update user_dtls set password=? where id=?";
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, newPassword);
-			ps.setInt(2, userid);
-
-			int i = ps.executeUpdate();
-			if (i == 1) {
-				f = true;
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return f;
-	}
-	
-	
+  public boolean changePassword(int id, String oldPassword, String replacement)
+      throws SQLException {
+    String previous;
+    try (PreparedStatement ps = c.prepareStatement("SELECT password FROM user_dtls WHERE id=?")) {
+      ps.setInt(1, id);
+      try (ResultSet rs = ps.executeQuery()) {
+        if (!rs.next() || !Passwords.verify(oldPassword, rs.getString(1))) return false;
+        previous = rs.getString(1);
+      }
+    }
+    try (PreparedStatement ps =
+        c.prepareStatement(
+            "UPDATE user_dtls SET password=?,auth_version=auth_version+1 WHERE id=? AND"
+                + " password=?")) {
+      ps.setString(1, Passwords.hash(replacement));
+      ps.setInt(2, id);
+      ps.setString(3, previous);
+      return ps.executeUpdate() == 1;
+    }
+  }
 }

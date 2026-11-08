@@ -1,0 +1,16 @@
+{
+  "recorded_at_utc": "2026-11-07T07:51:20.207154696Z",
+  "database": "MySQL 8.4.11-0ubuntu0.26.04.1",
+  "java": "25.0.4.1",
+  "fixture_rows": 10000,
+  "warmup_iterations": 5,
+  "samples_per_query": 20,
+  "legacy_select_ids_and_count_mean_ms": 3.9291,
+  "aggregate_count_mean_ms": 1.8465,
+  "legacy_p95_ms": 4.5317,
+  "aggregate_p95_ms": 2.5292,
+  "observed_mean_speedup": 2.13,
+  "client_rows_transferred_before": 10000,
+  "client_rows_transferred_after": 1,
+  "limits": "Single JDBC connection, localhost, warm cache, synthetic records, indexed doctor filter. Microbenchmark only; not an end-to-end application speedup. Fixtures remain in hms_test."
+}

@@ -1,0 +1,11 @@
+/target/
+/.local/
+/.env
+/.env.*
+!/.env.example
+/.idea/
+*.iml
+__pycache__/
+*.py[cod]
+*.log
+.DS_Store

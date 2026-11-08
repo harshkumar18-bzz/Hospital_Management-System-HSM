@@ -1,0 +1,58 @@
+name: Build, MySQL contracts, and deployed smoke tests
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: ci-test-password
+          MYSQL_DATABASE: hms_test
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost --silent"
+          --health-interval=5s --health-timeout=3s --health-retries=30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+      - name: H2 contracts and legacy migration
+        run: mvn -B clean verify
+      - name: Same contract against MySQL 8.4
+        run: mvn -B test "-Dtest.db.url=jdbc:mysql://127.0.0.1:3306/hms_test?allowPublicKeyRetrieval=true&useSSL=false" -Dtest.db.user=root -Dtest.db.password=ci-test-password
+      - name: Configure disposable container demo
+        run: |
+          mkdir -p .local
+          HASH=$(printf '%s\n' 'AdminDemo@123' | java -cp target/classes com.security.Passwords)
+          python3 - "$HASH" <<'PY'
+          import sys
+          from pathlib import Path
+          Path(".local/ci.env").write_text(
+              "DB_PASSWORD=ci-application-password\nMYSQL_ROOT_PASSWORD=ci-root-password\n"
+              "ADMIN_EMAIL=admin@hospital.test\nADMIN_PASSWORD_HASH='"+sys.argv[1]+"'\n"
+              "DEMO_MODE=true\nAPP_PORT=8082\n")
+          PY
+      - name: Build and run the actual WAR in Tomcat and MySQL
+        run: docker compose --env-file .local/ci.env up --build --wait --wait-timeout 240
+      - name: Full HTTP workflow and race checks
+        env:
+          HMS_TEST_ADMIN_PASSWORD: AdminDemo@123
+        run: python3 scripts/smoke_test.py http://localhost:8082
+      - name: Container diagnostics
+        if: failure()
+        run: |
+          if [ -f .local/ci.env ]; then docker compose --env-file .local/ci.env logs --tail=150; fi
+      - name: Remove disposable CI containers and data
+        if: always()
+        run: |
+          if [ -f .local/ci.env ]; then docker compose --env-file .local/ci.env down --volumes; fi

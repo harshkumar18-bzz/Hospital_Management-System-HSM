@@ -1,0 +1,7 @@
+target
+.local
+.git
+.env
+docs
+graphify-out
+*.log

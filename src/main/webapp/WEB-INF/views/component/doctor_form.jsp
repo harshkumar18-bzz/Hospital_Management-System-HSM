@@ -1,0 +1,9 @@
+<%@taglib prefix="c" uri="jakarta.tags.core"%>
+<div class="row g-3">
+<div class="col-md-6"><label for="name" class="form-label">Full name</label><input id="name" name="fullname" class="form-control" required maxlength="120" value="<c:out value='${doctor.fullName}'/>"></div>
+<div class="col-md-6"><label for="dob" class="form-label">Date of birth</label><input id="dob" name="dob" type="date" class="form-control" required value="<c:out value='${doctor.dob}'/>"></div>
+<div class="col-md-6"><label for="qualification" class="form-label">Qualification</label><input id="qualification" name="qualification" class="form-control" required maxlength="160" value="<c:out value='${doctor.qualification}'/>"></div>
+<div class="col-md-6"><label for="specialty" class="form-label">Specialty</label><select id="specialty" name="${profileOnly ? 'spec' : 'specialist'}" class="form-select" required><c:forEach var="s" items="${specialties}"><option value="<c:out value='${s.specialistName}'/>" ${doctor.specialist eq s.specialistName ? 'selected' : ''}><c:out value="${s.specialistName}"/></option></c:forEach></select></div>
+<div class="col-md-6"><label for="email" class="form-label">Email</label><input id="email" name="email" type="email" class="form-control" required maxlength="254" value="<c:out value='${doctor.email}'/>"></div>
+<div class="col-md-6"><label for="phone" class="form-label">Phone</label><input id="phone" name="mobno" type="tel" class="form-control" required maxlength="20" value="<c:out value='${doctor.mobNo}'/>"></div>
+<c:if test="${not profileOnly}"><div class="col-12"><label for="password" class="form-label">Password ${empty doctor ? '(required)' : '(leave blank to keep current)'}</label><input id="password" name="password" type="password" class="form-control" minlength="8" maxlength="128" autocomplete="new-password" ${empty doctor ? 'required' : ''}></div></c:if></div>

@@ -1,0 +1,3 @@
+<%@page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@taglib prefix="c" uri="jakarta.tags.core"%>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Your appointments | HMS</title><%@include file="../component/allcss.jsp"%></head><body><%@include file="navbar.jsp"%><main id="main-content" class="page-main"><div class="container"><h1 class="page-title">Your appointments</h1><p class="page-intro">Track reserved slots, appointment status, and consultation notes. Times use the hospital time zone.</p><%@include file="../component/messages.jsp"%><section class="appointments-panel"><%@include file="../component/appointment_table.jsp"%></section></div></main></body></html>

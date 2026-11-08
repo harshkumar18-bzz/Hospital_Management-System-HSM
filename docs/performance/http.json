@@ -1,0 +1,26 @@
+{
+  "recorded_at_utc": "2026-11-07T08:02:27.242063+00:00",
+  "base": "http://localhost:8082",
+  "python": "3.14.4",
+  "machine": "x86_64",
+  "users": 8,
+  "requests": 37192,
+  "endpoints": [
+    "/api/slots?doctorId=1",
+    "/api/appointments?page=1"
+  ],
+  "setup_and_warmup_excluded": true,
+  "dataset": "Four demo doctors, 14 days of slots; new users have empty appointment histories.",
+  "requested_duration_seconds": 15,
+  "elapsed_seconds": 15.002,
+  "throughput_requests_per_second": 2479.2,
+  "latency_ms": {
+    "mean": 3.22,
+    "p50": 3.08,
+    "p95": 5.31,
+    "p99": 6.47
+  },
+  "errors": 0,
+  "error_rate": 0.0,
+  "limits": "Closed-loop localhost read workload with Python threads and one server. Not a production capacity, write-throughput, or internet-latency claim."
+}
